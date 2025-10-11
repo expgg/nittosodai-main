@@ -138,8 +138,9 @@ body {
 /* UPDATED: Changed font size to accommodate longer name and added color */
 .shop-name {
     font-weight: 700;
-    font-size: 1.2rem;
-    color: var(--yellow);
+    /* EDIT 1: Increased size and fixed it to 1.8rem for all devices */
+    font-size: 1.4rem; 
+    color: var(--white); /* Changed from var(--yellow) to var(--white) */
     text-decoration: none;
     cursor: pointer;
 }
@@ -638,9 +639,10 @@ body {
     animation: flash-discount 0.5s infinite alternate; /* Faster flash */
 }
 
+/* EDITED: Changed 50% step color to match 0% and 100% to keep it solid red */
 @keyframes flash-discount {
     0% { transform: scale(1); opacity: 1; background-color: #d32f2f; }
-    50% { transform: scale(1.1); opacity: 0.9; background-color: #FF8C00; } /* Briefly flash to orange */
+    50% { transform: scale(1.1); opacity: 0.9; background-color: #d32f2f; } /* Changed from #FF8C00 to #d32f2f */
     100% { transform: scale(1); opacity: 1; background-color: #d32f2f; }
 }
 
@@ -1099,12 +1101,6 @@ body {
     padding: 30px;
 }
 
-.modal-content.order-success h3 {
-    color: var(--brown);
-    font-size: 1.5rem;
-    margin-bottom: 15px;
-}
-
 .modal-buttons {
     display: flex;
     flex-direction: column;
@@ -1235,17 +1231,19 @@ body {
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
-    /* UPDATED: Background color changed to an eye-catching orange */
-    background-color: #FF8C00;
+    /* EDIT 1: Increased padding/size */
+    background-color: #5a8b2f; 
     color: var(--white);
-    padding: 15px 20px;
+    padding: 20px 25px; /* Increased padding */
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     opacity: 0;
     transition: top 0.5s ease-out, opacity 0.5s ease-out;
-    font-weight: 600;
-    min-width: 250px;
+    font-weight: 700;
+    min-width: 300px; /* Increased min-width */
+    font-size: 1.1rem; /* Increased font size */
     text-align: center;
+    /* EDIT 2: Removed black border effect on text (text-shadow) */
 }
 
 .toast-notification.show {
@@ -1258,8 +1256,8 @@ body {
     .toast-notification {
         width: 90%;
         min-width: 0;
-        padding: 12px 15px;
-        font-size: 0.9rem;
+        padding: 15px 20px; /* Slightly adjusted padding for mobile */
+        font-size: 1rem; /* Adjusted font size for mobile */
     }
 }
 
@@ -1271,9 +1269,7 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 480px) {
-    .shop-name {
-        font-size: 1rem; /* Adjusted for mobile view to fit the longer name */
-    }
+    /* REMOVED: .shop-name size reduction to keep the text big */
     
     .section-title {
         font-size: 1.4rem;
@@ -1336,9 +1332,7 @@ body {
         font-size: 0.8rem;
     }
     
-    .shop-name {
-        font-size: 0.9rem; /* Further reduced for smallest screens */
-    }
+    /* REMOVED: .shop-name size reduction to keep the text big */
     
     .menu-btn {
         width: 35px;
