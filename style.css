@@ -139,7 +139,7 @@ body {
 .shop-name {
     font-weight: 700;
     /* EDIT 1: Increased size and fixed it to 1.8rem for all devices */
-    font-size: 1.4rem; 
+    font-size: 1rem; 
     color: var(--white); /* Changed from var(--yellow) to var(--white) */
     text-decoration: none;
     cursor: pointer;
