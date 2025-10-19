@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="category-page-title">Category</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- NEW: Toast Notification -->
+    <div id="toast-notification" class="toast-notification"></div>
+
+    <div class="modal" id="item-modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div id="modal-content-inner"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="message-modal">
+        <div class="modal-content">
+            <p id="message-text"></p>
+            <button class="close-button">Close</button>
+        </div>
+    </div>
+
+    <header class="top-bar">
+        <button id="hamburger-menu-btn" class="menu-btn"><i class="fas fa-bars"></i></button>
+        <!-- UPDATED: Added a container for the logo and text -->
+        <a href="index.html" class="shop-name-container">
+            <!-- UPDATED: New Logo image link used -->
+            <img src="https://i.ibb.co.com/KxBXgkpF/logo.jpg" alt="Nitto Sodai Logo" class="shop-logo">
+            <!-- UPDATED: Shop name text -->
+            <span class="shop-name">নিত্য সদাই উইথ সাবিরিন</span>
+        </a>
+        <button id="search-btn" class="menu-btn"><i class="fas fa-search"></i></button>
+    </header>
+    
+    <div class="search-container" id="search-container">
+        <form class="search-form" id="search-form">
+            <input type="text" class="search-input" id="search-input" placeholder="Search products...">
+            <button type="submit" class="search-submit"><i class="fas fa-search"></i></button>
+        </form>
+    </div>
+
+    <div id="side-menu" class="side-menu">
+        <a href="index.html">Home</a>
+        <a href="cart.html">Cart</a>
+        <!-- NEW: About link -->
+        <a href="about.html">About</a>
+        <!-- NEW: Call Now Button (replaces Contact link) -->
+        <a href="tel:+8801300226699" class="side-menu-call-btn">
+            <i class="fas fa-phone-alt"></i> Call Now
+        </a>
+    </div>
+    
+    <main class="container">
+        <h2 id="category-name-header" class="section-title"></h2>
+        <div class="product-grid" id="products-container">
+            <!-- Product cards will be injected here -->
+        </div>
+    </main>
+
+    <!-- BOTTOM NAVIGATION BAR (Existing) -->
+    <nav class="bottom-nav-bar" id="bottom-nav-bar">
+        <button id="nav-home-btn" class="nav-button">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </button>
+        <button id="nav-back-btn" class="nav-button">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+        </button>
+        <button id="nav-cart-btn" class="nav-button">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Cart</span>
+            <span id="cart-count" class="nav-cart-count">0</span>
+        </button>
+    </nav>
+
+    <script src="script.js"></script>
+</body>
+</html>

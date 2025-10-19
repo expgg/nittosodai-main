@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="category-page-title">About Us</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- NEW: Toast Notification -->
+    <div id="toast-notification" class="toast-notification"></div>
+
+    <div class="modal" id="item-modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <div id="modal-content-inner"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="message-modal">
+        <div class="modal-content">
+            <p id="message-text"></p>
+            <button class="close-button">Close</button>
+        </div>
+    </div>
+
+    <header class="top-bar">
+        <button id="hamburger-menu-btn" class="menu-btn"><i class="fas fa-bars"></i></button>
+        <!-- UPDATED: Logo link and name -->
+        <a href="index.html" class="shop-name-container">
+            <!-- UPDATED: New Logo image link used -->
+            <img src="https://i.ibb.co.com/KxBXgkpF/logo.jpg" alt="Nitto Sodai Logo" class="shop-logo">
+            <!-- UPDATED: Shop name text -->
+            <span class="shop-name">নিত্য সদাই উইথ সাবিরিন</span>
+        </a>
+        <button id="search-btn" class="menu-btn"><i class="fas fa-search"></i></button>
+    </header>
+    
+    <div class="search-container" id="search-container">
+        <form class="search-form" id="search-form">
+            <input type="text" class="search-input" id="search-input" placeholder="Search products...">
+            <button type="submit" class="search-submit"><i class="fas fa-search"></i></button>
+        </form>
+    </div>
+
+    <div id="side-menu" class="side-menu">
+        <a href="index.html">Home</a>
+        <a href="cart.html">Cart</a>
+        <!-- NEW: About link -->
+        <a href="about.html">About</a>
+        <!-- NEW: Call Now Button (replaces Contact link) -->
+        <a href="tel:+8801300226699" class="side-menu-call-btn">
+            <i class="fas fa-phone-alt"></i> Call Now
+        </a>
+    </div>
+    
+    <main class="container">
+        <h2 class="section-title">নিত্য সদাই সম্পর্কে</h2>
+        
+        <section class="about-section">
+            <p>নিত্তসদাই একটি আধুনিক, প্রযুক্তি‑চালিত স্মার্ট গ্রোসারি ও শিক্ষা‑ভিত্তিক ই‑কমার্স প্ল্যাটফর্ম। আধুনিক টুল ও উদ্ভাবনের মাধ্যমে স্মার্ট কেনাকাটা ও শেখার অভিজ্ঞতা প্রদানই আমাদের লক্ষ্য। দৈনিক প্রয়োজনীয় পণ্য থেকে শুরু করে শিক্ষাসামগ্রী — সবই এখানে সহজে পাওয়া যায়।</p>
+        </section>
+
+        <section class="mission-vision-section">
+            <div class="mission-card">
+                <h3>আমাদের মিশন</h3>
+                <p>উদ্ভাবন ও প্রযুক্তি দ্বারা চালিত হয়ে আমরা মানুষের দৈনন্দিন জীবনকে সহজ, সাশ্রয়ী ও কার্যকর করতে গ্রোসারি ও শিক্ষাসামগ্রীকে আরও কাছাকাছি নিয়ে আসতে কাজ করছি।</p>
+            </div>
+            <div class="vision-card">
+                <h3>আমাদের ভিশন</h3>
+                <p>আমরা এমন একটি ভবিষ্যৎ কল্পনা করি যেখানে দেশের প্রতিটি পরিবার একটি মাত্র ডিজিটাল প্ল্যাটফর্ম থেকে মানসম্মত গ্রোসারি ও শিক্ষাসামগ্রী সহজেই পাবে — ফলে তৈরি হবে স্মার্ট ঘর ও স্মার্ট মনের মানুষ।</p>
+            </div>
+        </section>
+
+        <section class="ceo-section">
+            <h2 class="section-title">প্রতিষ্ঠাতা ও সিইও</h2>
+            <div class="ceo-card">
+                <img src="https://i.ibb.co.com/rKFL66wv/sabirin.jpg" alt="মো. মতিউর রহমান সাবিরিন" class="ceo-photo">
+                <div class="ceo-details">
+                    <h3>মো. মতিউর রহমান সাবিরিন</h3>
+                    <p class="ceo-title">প্রতিষ্ঠাতা ও সিইও</p>
+                    <p>মো. মতিউর রহমান সাবিরিন একজন দূরদর্শী উদ্যোক্তা, যিনি প্রযুক্তির মাধ্যমে গ্রোসারি কেনাকাটার অভিজ্ঞতা বদলে দিতে নিত্তসদাই প্রতিষ্ঠা করেছেন। তাঁর নেতৃত্বে নিত্তসদাই আধুনিক ও সবার জন্য সহজলভ্য একটি গ্রোসারি ও শিক্ষা প্ল্যাটফর্মে রূপ নিয়েছে।</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="tagline-section">
+            <h2 class="section-title">NittoSodai</h2>
+            <p>আপনার প্রতিদিনের বাজারের সব চাহিদার জন্য নির্ভরযোগ্য অনলাইন শপ। ঘরে বসেই অর্ডার দিন, আমরা পৌঁছে দেব দরজায়।</p>
+        </section>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION BAR (Existing) -->
+    <nav class="bottom-nav-bar" id="bottom-nav-bar">
+        <button id="nav-home-btn" class="nav-button">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </button>
+        <button id="nav-back-btn" class="nav-button">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back</span>
+        </button>
+        <button id="nav-cart-btn" class="nav-button">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Cart</span>
+            <span id="cart-count" class="nav-cart-count">0</span>
+        </button>
+    </nav>
+
+    <script src="script.js"></script>
+</body>
+</html>
