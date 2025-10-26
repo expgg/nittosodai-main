@@ -25,7 +25,11 @@ function formatPrice(price) {
  * @returns {number} Rounded discount percentage, or 0 if not discounted.
  */
 function calculateDiscountPercentage(originalPrice, discountedPrice) {
-    if (originalPrice <= discountedPrice) {
+    // Ensure prices are valid numbers
+    originalPrice = parseFloat(originalPrice) || 0;
+    discountedPrice = parseFloat(discountedPrice) || 0;
+
+    if (originalPrice <= 0 || discountedPrice <= 0 || originalPrice <= discountedPrice) {
         return 0;
     }
     const discount = originalPrice - discountedPrice;
@@ -518,39 +522,57 @@ async function loadCategoryPage() {
         const itemName = row[0];
         const brandName = row[1];
         const weight = row[2];
-        const mainPrice = parseFloat(row[3]);
-        const discountedPrice = parseFloat(row[4]);
         const imageLink = row[5];
         const productId = row[6];
         const tags = row[7];
         
-        // FIX START: Declare productCard using 'const' inside the loop
+        // --- NEW STOCK CHECK ---
+        const mainPriceStr = row[3];
+        const discountedPriceStr = row[4];
+        // Product is out of stock if both price fields are empty
+        let isStockedOut = (!mainPriceStr || mainPriceStr.trim() === '') && (!discountedPriceStr || discountedPriceStr.trim() === '');
+        
+        let mainPrice = 0;
+        let discountedPrice = 0;
+        let finalPrice = 0;
+        let priceHtml = '';
+        let buttonHtml = '';
+        let discountBadge = '';
+        let discountPercent = 0;
+
+        if (isStockedOut) {
+            priceHtml = `<p class="price">Out of Stock</p>`;
+            buttonHtml = `<button class="add-to-cart-btn out-of-stock-btn" disabled>Out of Stock</button>`;
+        } else {
+            mainPrice = parseFloat(mainPriceStr) || 0;
+            discountedPrice = parseFloat(discountedPriceStr) || 0;
+            finalPrice = (discountedPrice > 0 && discountedPrice < mainPrice) ? discountedPrice : mainPrice;
+
+            // Calculate Discount Percentage
+            discountPercent = calculateDiscountPercentage(mainPrice, finalPrice);
+            if (discountPercent > 0) {
+                discountBadge = `<div class="discount-badge discount-badge-right">${discountPercent}% DISCOUNT</div>`;
+            }
+
+            if (discountedPrice > 0 && discountedPrice < mainPrice) {
+                priceHtml = `<p class="price discounted"><span class="main-price-strikethrough">${formatPrice(mainPrice)}</span>${formatPrice(discountedPrice)}</p>`;
+            } else {
+                priceHtml = `<p class="price">${formatPrice(mainPrice)}</p>`;
+            }
+            
+            buttonHtml = `<button class="add-to-cart-btn" data-id="${productId}" data-name="${itemName}" data-price="${finalPrice}" data-image="${imageLink}">Add to Cart</button>`;
+        }
+        // --- END STOCK CHECK ---
+
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
-        // FIX END
-
-        const finalPrice = discountedPrice < mainPrice ? discountedPrice : mainPrice;
-        
-        // Calculate Discount Percentage
-        const discountPercent = calculateDiscountPercentage(mainPrice, finalPrice);
-        let discountBadge = '';
-        if (discountPercent > 0) {
-            // UPDATED: Discount badge text and position class
-            discountBadge = `<div class="discount-badge discount-badge-right">${discountPercent}% DISCOUNT</div>`;
-        }
-
-        let priceHtml = `<p class="price">${formatPrice(mainPrice)}</p>`;
-        if (discountedPrice && discountedPrice < mainPrice) {
-            // UPDATED: Use formatPrice utility
-            priceHtml = `<p class="price discounted"><span class="main-price-strikethrough">${formatPrice(mainPrice)}</span>${formatPrice(discountedPrice)}</p>`;
-        }
         
         productCard.innerHTML = `
             ${discountBadge}
             <img src="${imageLink}" alt="${itemName}" onerror="this.onerror=null; this.src='https://placehold.co/150x150/8C7047/ffffff?text=Image+Not+Found'">
             <h3>${itemName}</h3>
             ${priceHtml}
-            <button class="add-to-cart-btn" data-id="${productId}" data-name="${itemName}" data-price="${finalPrice}" data-image="${imageLink}">Add to Cart</button>
+            ${buttonHtml}
         `;
         productsContainer.appendChild(productCard);
 
@@ -566,43 +588,43 @@ async function loadCategoryPage() {
                     discountedPrice: discountedPrice,
                     image: imageLink,
                     tags: tags,
-                    discountPercent: discountPercent // Pass discount percent to modal
+                    discountPercent: discountPercent,
+                    isStockedOut: isStockedOut // Pass the stock status to the modal
                 });
             }
         });
     });
 
     // Cart functionality is now handled by the global event listener in window.onload
-
-    // REMOVED: Setup floating cart button listener
 }
 
 function showItemModal(item) {
     const modal = document.getElementById('item-modal');
     const modalInner = document.getElementById('modal-content-inner');
     
-    // Calculate final price and discount percent if not passed (though it should be)
-    const originalPrice = item.mainPrice;
-    const finalPrice = item.discountedPrice < item.mainPrice ? item.discountedPrice : item.mainPrice;
-    const discountPercent = item.discountPercent || calculateDiscountPercentage(originalPrice, finalPrice);
+    let priceHtml = '';
+    let finalPrice = 0; // Need this for the button data-price
 
-    // UPDATED: Use formatPrice utility
-    let priceHtml = `<p class="price">${formatPrice(item.mainPrice)}</p>`;
-    let discountDisplay = '';
+    if (item.isStockedOut) {
+        priceHtml = `<p class="price">Out of Stock</p>`;
+    } else {
+        const originalPrice = item.mainPrice;
+        finalPrice = (item.discountedPrice > 0 && item.discountedPrice < item.mainPrice) ? item.discountedPrice : item.mainPrice;
+        const discountPercent = item.discountPercent || calculateDiscountPercentage(originalPrice, finalPrice);
 
-    if (item.discountedPrice && item.discountedPrice < item.mainPrice) {
-        // UPDATED: Use formatPrice utility and combine discount display
-        const priceFormatted = formatPrice(item.discountedPrice);
-        const strikethroughPrice = `<span class="main-price-strikethrough">${formatPrice(item.mainPrice)}</span>`;
-        
-        // Combine price and discount savings on the same line
-        priceHtml = `
-            <div class="price-and-savings">
-                <p class="price discounted">${strikethroughPrice}${priceFormatted}</p>
-                <p class="discount-percent-popup flash-save">You will save: <strong>${discountPercent}%!!</strong></p>
-            </div>
-        `;
-        
+        if (item.discountedPrice > 0 && item.discountedPrice < item.mainPrice) {
+            const priceFormatted = formatPrice(item.discountedPrice);
+            const strikethroughPrice = `<span class="main-price-strikethrough">${formatPrice(item.mainPrice)}</span>`;
+            
+            priceHtml = `
+                <div class="price-and-savings">
+                    <p class="price discounted">${strikethroughPrice}${priceFormatted}</p>
+                    <p class="discount-percent-popup flash-save">You will save: <strong>${discountPercent}%!!</strong></p>
+                </div>
+            `;
+        } else {
+            priceHtml = `<p class="price">${formatPrice(item.mainPrice)}</p>`;
+        }
     }
 
     modalInner.innerHTML = `
@@ -611,7 +633,8 @@ function showItemModal(item) {
             <h3>${item.name}</h3>
             <p><strong>Brand:</strong> ${item.brand}</p>
             <p><strong>Weight:</strong> ${item.weight}</p>
-            ${priceHtml} <p><strong>Product ID:</strong> ${item.id}</p>
+            ${priceHtml}
+            <p><strong>Product ID:</strong> ${item.id}</p>
             <p><strong>Tags:</strong> ${item.tags}</p>
             
             <div class="item-actions-container">
@@ -632,51 +655,61 @@ function showItemModal(item) {
     `;
     modal.style.display = 'block';
 
-    // --- NEW MODAL QUANTITY LOGIC ---
+    // --- MODAL QUANTITY LOGIC ---
     let quantity = 1;
     const qtyDisplay = document.getElementById('qty-display');
     const qtyMinus = document.getElementById('qty-minus');
     const qtyPlus = document.getElementById('qty-plus');
     const addToCartBtn = document.getElementById('modal-add-to-cart-btn');
 
-    const updateQuantityDisplay = () => {
-        qtyDisplay.textContent = quantity;
-    };
-
-    qtyMinus.onclick = () => {
-        if (quantity > 1) {
-            quantity--;
-            updateQuantityDisplay();
-        }
-    };
-
-    qtyPlus.onclick = () => {
-        quantity++;
-        updateQuantityDisplay();
-    };
-
-    addToCartBtn.onclick = function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const itemData = {
-            id: this.dataset.id,
-            name: this.dataset.name,
-            price: parseFloat(this.dataset.price),
-            image: this.dataset.image
+    // --- NEW STOCKED OUT LOGIC ---
+    if (item.isStockedOut) {
+        qtyMinus.disabled = true;
+        qtyPlus.disabled = true;
+        addToCartBtn.textContent = 'Out of Stock';
+        addToCartBtn.classList.add('out-of-stock-btn');
+        addToCartBtn.disabled = true;
+    } else {
+        // --- EXISTING IN-STOCK LOGIC ---
+        const updateQuantityDisplay = () => {
+            qtyDisplay.textContent = quantity;
         };
 
-        // Call addToCart with the selected quantity
-        addToCart(itemData, quantity);
-        
-        // Reset quantity for next open
-        quantity = 1;
+        qtyMinus.onclick = () => {
+            if (quantity > 1) {
+                quantity--;
+                updateQuantityDisplay();
+            }
+        };
 
-        // Close modal
-        modal.style.display = 'none';
-        return false;
-    };
-    // --- END NEW MODAL QUANTITY LOGIC ---
+        qtyPlus.onclick = () => {
+            quantity++;
+            updateQuantityDisplay();
+        };
+
+        addToCartBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const itemData = {
+                id: this.dataset.id,
+                name: this.dataset.name,
+                price: parseFloat(this.dataset.price),
+                image: this.dataset.image
+            };
+
+            // Call addToCart with the selected quantity
+            addToCart(itemData, quantity);
+            
+            // Reset quantity for next open
+            quantity = 1;
+
+            // Close modal
+            modal.style.display = 'none';
+            return false;
+        };
+    }
+    // --- END STOCKED OUT LOGIC ---
 
     // Close button functionality
     const closeButton = modal.querySelector('.close-button');
@@ -690,8 +723,6 @@ function showItemModal(item) {
             modal.style.display = 'none';
         }
     });
-
-    // Removed old redundant listener for 'add-to-cart-btn' since we attached a new one above
 }
 
 // Cart Page Functions
@@ -969,17 +1000,24 @@ async function searchProducts(query) {
                     // Skip header row
                     const products = productsData.slice(1);
                     products.forEach(row => {
+                        // --- NEW STOCK CHECK ---
+                        const mainPriceStr = row[3];
+                        const discountedPriceStr = row[4];
+                        const isStockedOut = (!mainPriceStr || mainPriceStr.trim() === '') && (!discountedPriceStr || discountedPriceStr.trim() === '');
+                        
                         allProducts.push({
                             name: row[0],
                             brand: row[1],
                             weight: row[2],
-                            mainPrice: parseFloat(row[3]),
-                            discountedPrice: parseFloat(row[4]),
+                            mainPrice: parseFloat(mainPriceStr) || 0,
+                            discountedPrice: parseFloat(discountedPriceStr) || 0,
                             image: row[5],
                             id: row[6],
                             tags: row[7],
-                            category: categoryName
+                            category: categoryName,
+                            isStockedOut: isStockedOut // Pass the stock status
                         });
+                        // --- END STOCK CHECK ---
                     });
                 }
             }
@@ -1028,22 +1066,33 @@ function displaySearchResults(results) {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
 
-        const finalPrice = item.discountedPrice < item.mainPrice ? item.discountedPrice : item.mainPrice;
-        
-        // Calculate Discount Percentage
-        const discountPercent = calculateDiscountPercentage(item.mainPrice, finalPrice);
+        // --- NEW STOCK CHECK ---
+        let finalPrice = 0;
+        let priceHtml = '';
+        let buttonHtml = '';
         let discountBadge = '';
-        if (discountPercent > 0) {
-            // UPDATED: Discount badge text and position class
-            discountBadge = `<div class="discount-badge discount-badge-right">${discountPercent}% DISCOUNT</div>`;
-        }
+        let discountPercent = 0;
 
-        // UPDATED: Use formatPrice utility
-        let priceHtml = `<p class="price">${formatPrice(item.mainPrice)}</p>`;
-        if (item.discountedPrice && item.discountedPrice < item.mainPrice) {
-            // UPDATED: Use formatPrice utility
-            priceHtml = `<p class="price discounted"><span class="main-price-strikethrough">${formatPrice(item.mainPrice)}</span>${formatPrice(item.discountedPrice)}</p>`;
+        if (item.isStockedOut) {
+            priceHtml = `<p class="price">Out of Stock</p>`;
+            buttonHtml = `<button class="add-to-cart-btn out-of-stock-btn" disabled>Out of Stock</button>`;
+        } else {
+            finalPrice = (item.discountedPrice > 0 && item.discountedPrice < item.mainPrice) ? item.discountedPrice : item.mainPrice;
+            
+            discountPercent = calculateDiscountPercentage(item.mainPrice, finalPrice);
+            if (discountPercent > 0) {
+                discountBadge = `<div class="discount-badge discount-badge-right">${discountPercent}% DISCOUNT</div>`;
+            }
+
+            if (item.discountedPrice > 0 && item.discountedPrice < item.mainPrice) {
+                priceHtml = `<p class="price discounted"><span class="main-price-strikethrough">${formatPrice(item.mainPrice)}</span>${formatPrice(item.discountedPrice)}</p>`;
+            } else {
+                priceHtml = `<p class="price">${formatPrice(item.mainPrice)}</p>`;
+            }
+            
+            buttonHtml = `<button class="add-to-cart-btn" data-id="${item.id}" data-name="${item.name}" data-price="${finalPrice}" data-image="${item.image}">Add to Cart</button>`;
         }
+        // --- END STOCK CHECK ---
         
         productCard.innerHTML = `
             ${discountBadge}
@@ -1051,7 +1100,7 @@ function displaySearchResults(results) {
             <h3>${item.name}</h3>
             <p class="category-tag">${item.category}</p>
             ${priceHtml}
-            <button class="add-to-cart-btn" data-id="${item.id}" data-name="${item.name}" data-price="${finalPrice}" data-image="${item.image}">Add to Cart</button>
+            ${buttonHtml}
         `;
         productsContainer.appendChild(productCard);
 
@@ -1061,6 +1110,7 @@ function displaySearchResults(results) {
                 showItemModal({
                     ...item,
                     discountPercent: discountPercent // Pass discount percent to modal
+                    // isStockedOut is already part of the 'item' object
                 });
             }
         });
