@@ -779,6 +779,21 @@ body {
     margin-top: 0.5rem;
 }
 
+/* --- NEW: Out of Stock Button Style --- */
+.out-of-stock-btn {
+    background-color: #d32f2f;
+    color: var(--white);
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.out-of-stock-btn:hover {
+    background-color: #d32f2f !important;
+    transform: none !important;
+}
+/* --- END NEW STYLE --- */
+
+
 .add-to-cart-btn:active {
     background-color: var(--green);
     transform: scale(1.05);
@@ -1238,6 +1253,19 @@ body {
     background-color: var(--green);
     color: var(--white);
 }
+
+/* --- NEW: Disabled state for quantity buttons --- */
+.quantity-control button:disabled {
+    background-color: #ccc;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.quantity-control button:disabled:hover {
+    background-color: #ccc;
+    color: #888;
+}
+/* --- END NEW STYLE --- */
 
 .quantity-control span {
     padding: 0 1rem;
