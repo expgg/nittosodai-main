@@ -1,26 +1,661 @@
 <!DOCTYPE html>
-<html lang="en">
+<!-- Set language to Bengali -->
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="category-page-title">About Us</title>
-    <link rel="stylesheet" href="style.css">
+    <title>আমাদের সম্পর্কে - নিত্য সদাই</title>
+    <!-- Font Awesome for icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- 
+      INBUILT CSS: All styles for this page are right here.
+      No external style.css link needed.
+    -->
+    <style>
+        /* General styles, color scheme, and responsive design */
+        :root {
+            --white: #F9F7F0;
+            --brown: #8C7047;
+            --green: #69A039;
+            --yellow: #E6B22B;
+            --dark-brown: #5E4A30;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--white);
+            color: var(--dark-brown);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            /* Added padding bottom to account for fixed bottom-nav-bar */
+            padding-bottom: 70px; 
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0.5rem;
+            flex: 1;
+        }
+
+        /* === SHARED STYLES (Header, Menu, Footer, etc.) === */
+
+        /* Top bar, menu, search */
+        .top-bar {
+            position: sticky;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: var(--brown);
+            color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .shop-name-container {
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Space between logo and text */
+            text-decoration: none;
+        }
+
+        .shop-logo {
+            display: block; 
+            height: 40px;
+            width: 40px;
+            max-width: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .shop-name {
+            font-weight: 700;
+            font-size: 1rem; 
+            color: var(--white);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Search bar styles */
+        .search-container {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            background-color: var(--dark-brown);
+            height: 0;
+            overflow: hidden;
+            transition: height 0.3s ease;
+            z-index: 98;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .search-container.open {
+            height: 60px;
+        }
+
+        .search-form {
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .search-container.open .search-form {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 4px 0 0 4px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-submit {
+            background-color: var(--yellow);
+            color: var(--dark-brown);
+            border: none;
+            border-radius: 0 4px 4px 0;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Side Menu */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            height: 100%;
+            width: 280px;
+            background-color: var(--dark-brown);
+            padding-top: 60px;
+            transition: left 0.3s ease;
+            z-index: 99;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        .side-menu.open {
+            left: 0;
+        }
+        
+        @media screen and (min-width: 0px) and (max-width: 2000px) {
+            .side-menu {
+                left: -280px !important;
+                display: none;
+            }
+            .side-menu.open {
+                left: 0 !important;
+                display: flex;
+            }
+        }
+
+        .side-menu a {
+            padding: 1.2rem 1.5rem;
+            text-decoration: none;
+            font-size: 1.2rem;
+            color: var(--white);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: block;
+        }
+        
+        .side-menu-call-btn {
+            background-color: var(--green) !important;
+            color: var(--white) !important;
+            border-radius: 6px !important;
+            padding: 1.2rem 1.5rem !important;
+            font-weight: 700;
+            margin: 15px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border-bottom: none !important;
+        }
+
+        .side-menu-call-btn:hover {
+            background-color: var(--dark-brown) !important;
+        }
+
+        /* Bottom Nav Bar Styles */
+        .bottom-nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: var(--brown);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .nav-button {
+            background: none;
+            border: none;
+            color: var(--white);
+            flex: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            position: relative;
+        }
+
+        .nav-button i {
+            font-size: 1.3rem;
+            margin-bottom: 3px;
+        }
+
+        .nav-button:hover {
+            background-color: var(--dark-brown);
+        }
+
+        .nav-cart-count {
+            position: absolute;
+            top: 5px;
+            right: 15px;
+            background-color: var(--yellow);
+            color: var(--dark-brown);
+            border-radius: 50%;
+            min-width: 18px;
+            height: 18px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0 0.25rem;
+        }
+
+        /* Modals and Toast */
+        .toast-notification {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background-color: #5a8b2f; 
+            color: var(--white);
+            padding: 20px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: top 0.5s ease-out, opacity 0.5s ease-out;
+            font-weight: 700;
+            min-width: 300px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .toast-notification.show {
+            top: 10px;
+            opacity: 1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 200;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .close-button {
+            color: var(--white);
+            position: absolute;
+            top: 0.8rem;
+            right: 1.2rem;
+            font-size: 1.6rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #d32f2f;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* === ABOUT PAGE SPECIFIC STYLES === */
+
+        .section {
+            margin-bottom: 2.5rem;
+        }
+        
+        /* UPDATED: Page Header Intro (Icon Removed) */
+        .page-header-intro {
+            text-align: center;
+            margin: 1.5rem 0 2.5rem 0;
+            padding: 1.5rem;
+            background-color: #f7f3e8;
+            border-radius: 8px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+        }
+        /* REMOVED: .page-header-intro .intro-icon */
+        .page-header-intro h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark-brown);
+            margin: 0;
+        }
+
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--dark-brown);
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background-color: var(--yellow);
+        }
+
+        /* --- 1. About Intro Text --- */
+        .about-intro-text {
+            background-color: var(--white);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 5px solid var(--brown);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 1.1rem;
+            text-align: center;
+            line-height: 1.8;
+            margin-bottom: 2.5rem; /* Same as section */
+        }
+        /* NEW: Styles for highlighted text and icons */
+        .about-intro-text strong {
+            color: var(--dark-brown);
+        }
+        .about-intro-text .highlight-green {
+            color: var(--green);
+            font-weight: 700;
+        }
+        .about-intro-text .icon {
+            color: var(--brown);
+            margin: 0 4px;
+        }
+
+        /* --- 2. How to Order (Video) --- */
+        
+        /* UPDATED: Full-width responsive video container */
+        .video-container {
+            position: relative;
+            width: 100%; /* Stick to edges */
+            padding-bottom: 56.25%; /* 16:9 ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            margin-bottom: 2rem;
+            /* REMOVED: max-width and display:none logic */
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        
+        /* REMOVED: .video-container-2by3 and .video-container-16by9 */
+
+
+        /* --- 3. Connect With Us Section --- */
+        .social-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .social-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .social-link i {
+            margin-right: 0.75rem;
+            font-size: 1.3rem;
+        }
+
+        /* Brand Colors */
+        .social-link.facebook { background-color: #1877F2; }
+        .social-link.youtube { background-color: #FF0000; }
+        .social-link.instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+        .social-link.whatsapp { background-color: #25D366; }
+
+        /* --- 4. CEO Section --- */
+        .ceo-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .ceo-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--white);
+            padding: 2rem 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .ceo-photo {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--green);
+            margin-bottom: 1.5rem;
+        }
+        .ceo-details h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+            color: var(--dark-brown);
+        }
+        .ceo-title {
+            font-weight: 600;
+            color: var(--brown);
+            margin-bottom: 1rem;
+        }
+
+        /* --- 5. Mission/Vision Section --- */
+        .mission-vision-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .mission-card, .vision-card {
+            background-color: #f7f3e8;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 5px solid var(--brown);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .mission-card h3, .vision-card h3 {
+            color: var(--brown);
+            margin-bottom: 0.75rem;
+        }
+
+        /* --- 6. Key Info Section --- */
+        .key-info-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .info-card {
+            background-color: var(--white);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+        }
+        .info-card h3 {
+            font-size: 1.3rem;
+            color: var(--brown);
+            margin-bottom: 1rem;
+            border-bottom: 2px solid var(--yellow);
+            padding-bottom: 0.5rem;
+        }
+        .info-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .info-card ul li {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        .delivery-list {
+            list-style: none;
+            padding-left: 0;
+            columns: 2;
+            -webkit-columns: 2;
+            -moz-columns: 2;
+        }
+        .delivery-list li {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+            padding-left: 20px;
+        }
+        .delivery-list li::before {
+            content: '\f3c5'; /* Font Awesome location-dot icon */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: var(--green);
+            position: absolute;
+            left: 0;
+            top: 2px;
+        }
+        
+        /* === RESPONSIVE MEDIA QUERIES === */
+
+        @media (max-width: 480px) {
+            .toast-notification {
+                width: 90%;
+                min-width: 0;
+                padding: 15px 20px;
+                font-size: 1rem;
+            }
+            .modal-content {
+                padding: 1.5rem;
+                margin: 15% auto;
+                width: 95%;
+            }
+            .page-header-intro h2 {
+                font-size: 1.8rem;
+            }
+            .section-title {
+                font-size: 1.4rem;
+            }
+            .side-menu {
+                width: 75%;
+            }
+            .delivery-list {
+                columns: 1;
+                -webkit-columns: 1;
+                -moz-columns: 1;
+            }
+        }
+        
+        @media (min-width: 600px) {
+            .social-links-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 768px) {
+             .mission-vision-section {
+                flex-direction: row;
+             }
+            .key-info-section {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            
+            /* REMOVED: All old video container fixes */
+        }
+        
+        @media (min-width: 900px) {
+            .social-links-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            /* REMOVED: .video-container-2by3 fix */
+        }
+
+    </style>
 </head>
 <body>
-    <!-- NEW: Toast Notification -->
+    <!-- Toast Notification (Shared) -->
     <div id="toast-notification" class="toast-notification"></div>
 
+    <!-- Modals (Shared) -->
     <div class="modal" id="item-modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <div id="modal-content-inner"></div>
         </div>
     </div>
-
     <div class="modal" id="message-modal">
         <div class="modal-content">
             <p id="message-text"></p>
@@ -28,18 +663,17 @@
         </div>
     </div>
 
+    <!-- HEADER (Shared Component) -->
     <header class="top-bar">
         <button id="hamburger-menu-btn" class="menu-btn"><i class="fas fa-bars"></i></button>
-        <!-- UPDATED: Logo link and name -->
         <a href="index.html" class="shop-name-container">
-            <!-- UPDATED: New Logo image link used -->
             <img src="https://i.ibb.co.com/KxBXgkpF/logo.jpg" alt="Nitto Sodai Logo" class="shop-logo">
-            <!-- UPDATED: Shop name text -->
             <span class="shop-name">নিত্য সদাই উইথ সাবিরিন</span>
         </a>
         <button id="search-btn" class="menu-btn"><i class="fas fa-search"></i></button>
     </header>
     
+    <!-- Search Bar (Shared) -->
     <div class="search-container" id="search-container">
         <form class="search-form" id="search-form">
             <input type="text" class="search-input" id="search-input" placeholder="Search products...">
@@ -47,55 +681,136 @@
         </form>
     </div>
 
+    <!-- Side Menu (Shared) -->
     <div id="side-menu" class="side-menu">
         <a href="index.html">Home</a>
         <a href="cart.html">Cart</a>
-        <a href="oh.html">Order History</a> <!-- UPDATED -->
+        <a href="oh.html">Order History</a>
         <a href="about.html">About</a>
-        <!-- NEW: Call Now Button (replaces Contact link) -->
         <a href="tel:+8801300226699" class="side-menu-call-btn">
             <i class="fas fa-phone-alt"></i> Call Now
         </a>
     </div>
     
+    <!-- Main Content Area (NEW LAYOUT) -->
     <main class="container">
-        <h2 class="section-title">নিত্য সদাই সম্পর্কে</h2>
-        
-        <section class="about-section">
-            <p>নিত্তসদাই একটি আধুনিক, প্রযুক্তি‑চালিত স্মার্ট গ্রোসারি ও শিক্ষা‑ভিত্তিক ই‑কমার্স প্ল্যাটফর্ম। আধুনিক টুল ও উদ্ভাবনের মাধ্যমে স্মার্ট কেনাকাটা ও শেখার অভিজ্ঞতা প্রদানই আমাদের লক্ষ্য। দৈনিক প্রয়োজনীয় পণ্য থেকে শুরু করে শিক্ষাসামগ্রী — সবই এখানে সহজে পাওয়া যায়।</p>
+
+        <!-- UPDATED: Page Header (Icon Removed) -->
+        <section class="page-header-intro">
+            <h2>নিত্য সদাই সম্পর্কে</h2>
         </section>
 
-        <section class="mission-vision-section">
-            <div class="mission-card">
-                <h3>আমাদের মিশন</h3>
-                <p>উদ্ভাবন ও প্রযুক্তি দ্বারা চালিত হয়ে আমরা মানুষের দৈনন্দিন জীবনকে সহজ, সাশ্রয়ী ও কার্যকর করতে গ্রোসারি ও শিক্ষাসামগ্রীকে আরও কাছাকাছি নিয়ে আসতে কাজ করছি।</p>
+        <!-- 1. UPDATED INTRO TEXT (with icons and highlights) -->
+        <p class="about-intro-text">
+            এই অনলাইন শপটি তৈরি করেছেন <strong>মো. মতিউর রহমান সাবিরিন</strong>। <i class="fas fa-store icon"></i> সুনামগঞ্জে কয়েক দশক ধরে তার একটি <span class="highlight-green">সফল দোকান</span> রয়েছে। তিনি সুনামগঞ্জের মানুষের জন্য এই <i class="fas fa-laptop-house icon"></i> অনলাইন পদক্ষেপ নিয়েছেন, যাতে মানুষ <i class="fas fa-shopping-basket icon"></i> ঘরে বসেই আরামে পণ্য অর্ডার করতে পারে।
+        </p>
+
+        <!-- 2. "How to Order" YouTube Embed -->
+        <section class="section">
+            <h2 class="section-title">কিভাবে অর্ডার করবেন?</h2>
+            
+            <!-- UPDATED: Single Full-Width Video Container -->
+            <div class="video-container">
+                <iframe 
+                    src="https://www.youtube.com/embed/Gj2jfbVQiOQ" 
+                    title="How to order from Nitto Sodai" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
             </div>
-            <div class="vision-card">
-                <h3>আমাদের ভিশন</h3>
-                <p>আমরা এমন একটি ভবিষ্যৎ কল্পনা করি যেখানে দেশের প্রতিটি পরিবার একটি মাত্র ডিজিটাল প্ল্যাটফর্ম থেকে মানসম্মত গ্রোসারি ও শিক্ষাসামগ্রী সহজেই পাবে — ফলে তৈরি হবে স্মার্ট ঘর ও স্মার্ট মনের মানুষ।</p>
-            </div>
+            <!-- REMOVED: Old portrait/landscape containers -->
         </section>
 
-        <section class="ceo-section">
+        <!-- 3. "Connect With Us" (Socials) -->
+        <section class="section">
+            <h2 class="section-title">যোগাযোগ করুন</h2>
+            <div class="social-links-grid">
+                <!-- Links need to be updated to your actual profiles -->
+                <a href="https://www.facebook.com/nittosodai.coms" class="social-link facebook" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-facebook"></i> <span>Facebook</span>
+                </a>
+                <a href="https://www.youtube.com/@NittoSodai-sabirin" class="social-link youtube" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-youtube"></i> <span>YouTube</span>
+                </a>
+                <a href="https://www.instagram.com/nittosodai.coms" class="social-link instagram" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-instagram"></i> <span>Instagram</span>
+                </a>
+                <!-- Update the phone number in the link -->
+                <a href="https://wa.me/8801300226699" class="social-link whatsapp" target="_blank" rel="noopener noreferrer">
+                    <i class="fab fa-whatsapp"></i> <span>WhatsApp</span>
+                </a>
+            </div>
+
+        </section>
+
+        <!-- 4. Founder & CEO -->
+        <section class="section ceo-section">
             <h2 class="section-title">প্রতিষ্ঠাতা ও সিইও</h2>
             <div class="ceo-card">
                 <img src="https://i.ibb.co.com/rKFL66wv/sabirin.jpg" alt="মো. মতিউর রহমান সাবিরিন" class="ceo-photo">
                 <div class="ceo-details">
                     <h3>মো. মতিউর রহমান সাবিরিন</h3>
                     <p class="ceo-title">প্রতিষ্ঠাতা ও সিইও</p>
-                    <p>মো. মতিউর রহমান সাবিরিন একজন দূরদর্শী উদ্যোক্তা, যিনি প্রযুক্তির মাধ্যমে গ্রোসারি কেনাকাটার অভিজ্ঞতা বদলে দিতে নিত্তসদাই প্রতিষ্ঠা করেছেন। তাঁর নেতৃত্বে নিত্তসদাই আধুনিক ও সবার জন্য সহজলভ্য একটি গ্রোসারি ও শিক্ষা প্ল্যাটফর্মে রূপ নিয়েছে।</p>
+                    <p>মো. মতিউর রহমান সাবিরিন এই অঞ্চলের মানুষের জন্য কেনাকাটার অভিজ্ঞতাকে সহজ করার একটি স্বপ্ন নিয়ে 'নিত্য সদাই' প্রতিষ্ঠা করেছেন। তার নেতৃত্বে, আমরা প্রযুক্তি এবং আস্থার সমন্বয়ে আপনার সেবা করতে পেরে গর্বিত।</p>
                 </div>
             </div>
         </section>
 
-        <section class="tagline-section">
-            <h2 class="section-title">NittoSodai</h2>
-            <p>আপনার প্রতিদিনের বাজারের সব চাহিদার জন্য নির্ভরযোগ্য অনলাইন শপ। ঘরে বসেই অর্ডার দিন, আমরা পৌঁছে দেব দরজায়।</p>
+        <!-- 5. Mission & Vision -->
+        <section class="section mission-vision-section">
+            <div class="mission-card">
+                <h3>আমাদের লক্ষ্য</h3>
+                <p>আমাদের লক্ষ্য হল আপনার দৈনন্দিন কেনাকাটা সহজ করা। আমরা আপনাকে সেরা মানের পণ্য সঠিক দামে এবং দ্রুততম সময়ে পৌঁছে দিতে প্রতিশ্রুতিবদ্ধ।</p>
+            </div>
+            <div class="vision-card">
+                <h3>আমাদের ভিশন</h3>
+                <p>আমরা সুনামগঞ্জের প্রতিটি পরিবারের জন্য একটি নির্ভরযোগ্য অনলাইন গ্রোসারি প্ল্যাটফর্ম হতে চাই, যেখানে মানুষ আস্থার সাথে তাদের প্রয়োজনীয় সবকিছু এক জায়গা থেকেই পাবে।</p>
+            </div>
+        </section>
+
+        <!-- 6. Key Info (Hours & Delivery) -->
+        <section class="section">
+            <div class="key-info-section">
+                <div class="info-card">
+                    <!-- UPDATED: Title -->
+                    <h3>অনলাইন অর্ডারের সময়সূচী</h3>
+                    <!-- UPDATED: Content -->
+                    <ul>
+                        <li><i class="fas fa-check-circle icon" style="color: var(--green);"></i> অনলাইন অর্ডারের জন্য আমরা প্রতিদিন খোলা।</li>
+                        <li><i class="fas fa-calendar-day icon" style="color: var(--brown);"></i> শুক্রবার সহ সপ্তাহের ৭ দিনই অর্ডার করতে পারবেন।</li>
+                        <li><strong><i class="fas fa-clock icon" style="color: var(--dark-brown);"></i> অর্ডারের সময়:</strong> সকাল ৯টা - রাত ১০টা</li>
+                    </ul>
+                </div>
+                <div class="info-card">
+                    <h3>ডেলিভারি এরিয়া</h3>
+                    <p>আমরা বর্তমানে নিম্নলিখিত এলাকাগুলিতে ডেলিভারি দিচ্ছি:</p>
+                    <ul class="delivery-list">
+                        <li>সোলঘর</li>
+                        <li>নবিনগর</li>
+                        <li>ধরারগাঁও</li>
+                        <li>বনানী</li>
+                        <li>বনানী পাড়া</li>
+                        <li>মোহাম্মুদপুর থেকে আলহেরা মাদ্রাসা পর্যন্ত</li>
+                        <li>আলী পাড়া</li>
+                        <li>বিল পাড়</li>
+                        <li>মেডিকেল রোড</li>
+                        <li>স্পির বাংলা</li>
+                        <li>বিহারীর পয়েন্ট</li>
+                        <li>ময়নার পয়েন্ট</li>
+                        <li>বুক পয়েন্ট</li>
+                        <li>মরা টিলা</li>
+                        <li>বাঁধন পাড়া</li>
+                        <li>উকিল পাড়া</li>
+                        <li>কাজীর পয়েন্ট</li>
+                    </ul>
+                </div>
+            </div>
         </section>
 
     </main>
 
-    <!-- BOTTOM NAVIGATION BAR (Existing) -->
+    <!-- BOTTOM NAV BAR (Shared Component) -->
     <nav class="bottom-nav-bar" id="bottom-nav-bar">
         <button id="nav-home-btn" class="nav-button">
             <i class="fas fa-home"></i>
@@ -110,13 +825,19 @@
             <span>Cart</span>
             <span id="cart-count" class="nav-cart-count">0</span>
         </button>
-        <!-- UPDATED: NEW HISTORY BUTTON -->
         <button id="nav-history-btn" class="nav-button">
             <i class="fas fa-receipt"></i>
             <span>History</span>
         </button>
     </nav>
 
+    <!-- Shared script file (for nav, search, cart, etc.) -->
     <script src="script.js"></script>
 </body>
 </html>
+
+
+
+
+
+
