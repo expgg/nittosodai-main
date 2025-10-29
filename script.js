@@ -6,8 +6,8 @@ const CATEGORY_SHEET_NAME = "Sheet1";
 const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1427390049783255110/8U3d9RnA3wT8VzeblhfHOtv0Z5RDVLBj6A636ZOA2o7o6DXJlIHK6POhbWKF5OdOQXbo";
 
 // ** NEW SHOP LOCATION COORDINATES (Placeholder: Googleplex) **
-const SHOP_LATITUDE = "37.42200407982563";
-const SHOP_LONGITUDE = "-122.08424968502334";
+const SHOP_LATITUDE = "25.0723411";
+const SHOP_LONGITUDE = "91.4106641";
 
 // ** GLOBAL: Timer for managing the toast notification visibility **
 let toastTimer = null; 
