@@ -19,6 +19,45 @@ function formatPrice(price) {
 }
 
 /**
+ * NEW FUNCTION: Generates a random 6-character alphanumeric string for the Order ID.
+ * Uses a safe and simple method for non-cryptographic unique IDs.
+ * @returns {string} The unique order ID (e.g., F2Y48K).
+ */
+function generateOrderId() {
+    // Characters: uppercase letters and digits (A-Z, 0-9)
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    const length = 6;
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+/**
+ * NEW FUNCTION: Formats a Date object into the required DD/MM/YY Time - 12 Hour format.
+ * Example: 29/10/25 Time - 08:41 PM
+ * @param {Date} dateObj - The Date object to format.
+ * @returns {string} The formatted date string.
+ */
+function formatOrderDate(dateObj) {
+    // Date components (DD/MM/YY)
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const year = String(dateObj.getFullYear()).slice(-2); // Get last two digits of the year
+    
+    // Time components (12 Hour format with AM/PM)
+    let hours = dateObj.getHours();
+    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12; // The hour '0' should be '12'
+    hours = String(hours).padStart(2, '0');
+    
+    return `${day}/${month}/${year} Time - ${hours}:${minutes} ${ampm}`;
+}
+
+/**
  * NEW FUNCTION: Calculates the discount percentage, rounded to the nearest integer.
  * @param {number} originalPrice 
  * @param {number} discountedPrice 
@@ -861,9 +900,76 @@ function loadCartPage() {
 
 
     if (orderForm) {
+        // Add event listener for phone validation checks as user types
+        const phoneInput = document.getElementById('customer-phone');
+        phoneInput.addEventListener('input', validatePhoneNumber);
+        
         orderForm.addEventListener('submit', handleOrderSubmit);
     }
 }
+
+/**
+ * NEW FUNCTION: Cleans and validates the phone number for the Bangladesh format.
+ * Fixes the issue where +880 and other symbols were being incorrectly stripped.
+ * @returns {string | null} The clean 11-digit number (e.g., '01773185817') or null if invalid.
+ */
+function cleanAndValidatePhone(rawNumber) {
+    const raw = rawNumber.trim();
+    // 1. Strip all non-digit characters and plus signs
+    let cleaned = raw.replace(/[^\d+]/g, '');
+    
+    // 2. Check for common country codes and strip them to get the local 11 digits
+    if (cleaned.startsWith('+880')) {
+        // If it starts with +880, remove it. Result should be 10 digits (e.g., 1773185817).
+        cleaned = cleaned.substring(4); 
+    } else if (cleaned.startsWith('880')) {
+        // If it starts with 880 (without plus), remove it. Result should be 10 digits.
+        cleaned = cleaned.substring(3);
+    }
+    
+    // 3. Final Validation: Must be exactly 11 digits (e.g., 01773185817)
+    // If the cleaned number has 10 digits, we assume the leading '0' was omitted (common with country code entry)
+    if (cleaned.length === 10 && cleaned.startsWith('1')) {
+        // Add the mandatory leading '0' for the standard 11-digit Bangladesh format (01xxxxxxxxx)
+        cleaned = '0' + cleaned;
+    }
+
+    // Final check for 11 digits starting with '01'
+    if (cleaned.length === 11 && cleaned.startsWith('01')) {
+        return cleaned; // Return the valid 11-digit number
+    }
+
+    return null; // Invalid
+}
+
+/**
+ * NEW FUNCTION: Handles visual feedback for phone number validation.
+ * Triggers the red glow and custom error message.
+ * @returns {boolean} True if the number is valid, False otherwise.
+ */
+function validatePhoneNumber() {
+    const phoneInput = document.getElementById('customer-phone');
+    const phoneMsg = document.getElementById('phone-validation-msg');
+    const validNumber = cleanAndValidatePhone(phoneInput.value);
+    
+    const isValid = validNumber !== null;
+
+    if (isValid) {
+        // Valid: Remove error styles and hide message
+        phoneInput.classList.remove('phone-error');
+        phoneMsg.classList.remove('show');
+    } else {
+        // Invalid: Add error styles and show message (only if user has typed something)
+        phoneInput.classList.add('phone-error');
+        if (phoneInput.value.length > 0) {
+            phoneMsg.classList.add('show');
+        } else {
+            phoneMsg.classList.remove('show');
+        }
+    }
+    return isValid;
+}
+
 
 // --- NEW DELIMITER FOR BOT DATA EXTRACTION ---
 const RAW_DATA_DELIMITER = "---ORDER_DATA_JSON---";
@@ -872,7 +978,7 @@ async function handleOrderSubmit(e) {
     e.preventDefault();
     const cart = getCart();
     const customerName = document.getElementById('customer-name').value;
-    const customerPhone = document.getElementById('customer-phone').value;
+    const customerPhoneInput = document.getElementById('customer-phone');
     const customerAddress = document.getElementById('customer-address').value;
     
     if (Object.keys(cart).length === 0) {
@@ -880,26 +986,48 @@ async function handleOrderSubmit(e) {
         return;
     }
     
-    if (!customerName || !customerPhone) {
-        showMessage("Please fill in your name and phone number to complete the order.");
+    // --- CRITICAL PHONE VALIDATION GATE ---
+    const cleanedCustomerPhone = cleanAndValidatePhone(customerPhoneInput.value);
+    if (!cleanedCustomerPhone) {
+        // Validation failed (red glow and message already active via validatePhoneNumber event listener)
+        customerPhoneInput.focus(); // Focus on the input to highlight the error
+        document.getElementById('phone-validation-msg').classList.add('show');
+        return; 
+    }
+    
+    if (!customerName) {
+        showMessage("Please fill in your name to complete the order.");
         return;
     }
+    
+    // --- NEW ORDER ID AND DATE GENERATION ---
+    const orderId = generateOrderId();
+    const orderDateObj = new Date();
+    const formattedDate = formatOrderDate(orderDateObj);
+    // ---------------------------------------
 
-    // UPDATED: Added orderDate
+    const itemsTotal = Object.values(cart).reduce((total, item) => total + (item.price * item.quantity), 0);
+    
     const orderDetails = {
+        orderId: orderId, 
+        formattedDate: formattedDate, 
         customerName,
-        customerPhone,
+        // Send the fully cleaned 11-digit number to storage/printer
+        customerPhone: cleanedCustomerPhone, 
         customerAddress,
         items: Object.values(cart),
-        totalPrice: Object.values(cart).reduce((total, item) => total + (item.price * item.quantity), 0),
-        orderDate: new Date().toISOString() // ADDED: Timestamp for the order
+        totalPrice: itemsTotal, // This is the items subtotal (before delivery fee)
+        orderDate: orderDateObj.toISOString() 
     };
 
-    // New machine-readable data payload for the bot
+    // New machine-readable data payload for the bot (includes new ID/Date)
     const rawOrderData = {
+        orderId: orderId, 
+        formattedDate: formattedDate, 
         customer: {
             name: customerName,
-            phone: customerPhone,
+            // Send the fully cleaned 11-digit number to the printer
+            phone: cleanedCustomerPhone, 
             address: customerAddress || null
         },
         items: Object.values(cart).map(item => ({
@@ -908,11 +1036,10 @@ async function handleOrderSubmit(e) {
             quantity: item.quantity,
             price: item.price
         })),
-        totalPrice: Object.values(cart).reduce((total, item) => total + (item.price * item.quantity), 0)
+        totalPrice: itemsTotal // This is the items subtotal
     };
 
     // --- CRITICAL CHANGE: Embed the raw JSON string in the content field ---
-    // The bot will extract this JSON string from the message.content to get the printer data.
     const rawDataJsonString = JSON.stringify(rawOrderData);
 
     const webhookData = {
@@ -922,21 +1049,27 @@ async function handleOrderSubmit(e) {
             "title": "Order Receipt",
             "color": 6737517, // Brown in decimal
             "fields": [
+                // --- NEW FIELD FOR ORDER ID AND DATE (COPYABLE) ---
+                {
+                    "name": "Order Info",
+                    // Use inline code for copyable Order ID
+                    "value": `Order Number - \`${orderId}\`\nOrder Date - ${formattedDate}`, 
+                    "inline": false
+                },
+                // --------------------------------------------------
                 {
                     "name": "Customer Info",
                     "value": `Name: ${orderDetails.customerName}\nPhone: ${orderDetails.customerPhone}\nAddress: ${orderDetails.customerAddress || 'N/A'}`,
                     "inline": false
                 },
                 {
-                    // UPDATED: Use formatPrice utility (internal text for webhook)
                     "name": "Items",
                     "value": orderDetails.items.map(item => `- ${item.name} x${item.quantity} (${formatPrice(item.price)})`).join('\n'),
                     "inline": false
                 },
                 {
-                    // UPDATED: Use formatPrice utility (internal text for webhook)
-                    "name": "Total Price",
-                    "value": formatPrice(orderDetails.totalPrice),
+                    "name": "Items Subtotal",
+                    "value": formatPrice(itemsTotal),
                     "inline": false
                 }
             ],
@@ -945,9 +1078,7 @@ async function handleOrderSubmit(e) {
             },
             "timestamp": new Date().toISOString()
         }],
-        // The non-standard "raw_order_data" field is REMOVED as Discord strips it.
     };
-    // --------------------------------------------------------------------------
     
     try {
         const response = await fetch(DISCORD_WEBHOOK_URL, {
@@ -959,7 +1090,7 @@ async function handleOrderSubmit(e) {
         });
         
         if (response.ok) {
-            // --- NEW: SAVE TO ORDER HISTORY ---
+            // --- NEW: SAVE TO ORDER HISTORY (includes ID/Date) ---
             const pastOrders = getPastOrders();
             pastOrders.push(orderDetails); // Add the full order details
             savePastOrders(pastOrders);
@@ -1097,7 +1228,7 @@ function displaySearchResults(results) {
         productCard.innerHTML = `
             ${discountBadge}
             <img src="${item.image}" alt="${item.name}" onerror="this.onerror=null; this.src='https://placehold.co/150x150/8C7047/ffffff?text=Image+Not+Found'">
-            <h3>${item.name}</h3>
+            <h3>${itemName}</h3>
             <p class="category-tag">${item.category}</p>
             ${priceHtml}
             ${buttonHtml}
@@ -1198,10 +1329,8 @@ function loadOrderHistoryPage() {
 
     container.innerHTML = ''; // Clear container
     orders.forEach(order => {
-        const orderCard = document.createElement('div');
-        orderCard.classList.add('order-card');
-
-        const orderDate = new Date(order.orderDate).toLocaleString('en-US', {
+        // Use the custom formatted date if available, otherwise fall back
+        const orderDateDisplay = order.formattedDate || new Date(order.orderDate).toLocaleString('en-US', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
@@ -1216,9 +1345,15 @@ function loadOrderHistoryPage() {
             </li>
         `).join('');
 
+        // Use the new orderId
+        const orderIdDisplay = order.orderId ? ` (#${order.orderId})` : '';
+
+        const orderCard = document.createElement('div'); // Define orderCard here
+        orderCard.classList.add('order-card');
+
         orderCard.innerHTML = `
             <div class="order-card-header">
-                <h4>Order from: ${orderDate}</h4>
+                <h4>Order from: ${orderDateDisplay} ${orderIdDisplay}</h4>
                 <span class="price">Total: ${formatPrice(order.totalPrice)}</span>
             </div>
             <div class="order-card-body">
@@ -1298,3 +1433,4 @@ window.onload = () => {
         loadHomepage();
     }
 };
+
