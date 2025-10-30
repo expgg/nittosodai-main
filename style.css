@@ -5,6 +5,7 @@
     --green: #69A039;
     --yellow: #E6B22B;
     --dark-brown: #5E4A30;
+    --red: #d32f2f; /* Standard red for errors */
 }
 
 /* Home button fixed at bottom left */
@@ -1021,18 +1022,61 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    position: relative; /* For notification positioning */
 }
 
-.order-form input,
-.order-form textarea {
+.order-form input {
     width: 100%;
     padding: 0.75rem 1rem;
     border: 1px solid #ccc;
     border-radius: 6px;
     font-family: inherit;
     font-size: 1rem;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s; /* Added box-shadow transition */
 }
+
+/* --- NEW: PHONE NUMBER VALIDATION STYLES --- */
+/* Base error state for phone number input */
+.order-form input.phone-error {
+    border-color: var(--red) !important;
+    box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.4);
+    animation: pulse-red 0.5s infinite alternate;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.4); }
+    100% { box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.6); }
+}
+
+/* Custom Notification near the input */
+.validation-message {
+    position: absolute;
+    /* Positioned below the phone input field */
+    top: calc(75px + 1rem); /* 2nd input position (approx 75px + 1rem gap) */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 480px;
+    background-color: var(--red);
+    color: var(--white);
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    text-align: center;
+    font-weight: 600;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, top 0.3s ease-in-out;
+    pointer-events: none; /* Allows clicks to pass through to the form */
+}
+
+.validation-message.show {
+    opacity: 1;
+    top: calc(75px + 1rem + 5px); /* Slide down slightly */
+}
+
+/* --- END PHONE NUMBER VALIDATION STYLES --- */
 
 .order-form input:focus,
 .order-form textarea:focus {
@@ -1572,4 +1616,11 @@ body {
     color: var(--dark-brown);
     margin-bottom: 1.5rem;
 }
-/* END OF ADDED CSS */
+
+/* NEW: Strikethrough style for free delivery in receipt */
+.strikethrough-fee {
+    text-decoration: line-through;
+    color: #999;
+    margin-right: 5px;
+}
+/* END OF ALL ADDED CSS */
