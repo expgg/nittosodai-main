@@ -69,7 +69,9 @@
             <a href="oh.html" class="secondary-btn" id="view-history-btn">View Order History</a>
             <form id="order-form" class="order-form">
                 <input type="text" id="customer-name" placeholder="Your Name *" required>
-                <input type="tel" id="customer-phone" placeholder="Phone Number *" required>
+                <!-- UPDATED: Added ID and a placeholder for the validation message -->
+                <input type="tel" id="customer-phone" placeholder="Phone Number (e.g., 01xxxxxxxxx) *" required>
+                <div id="phone-validation-msg" class="validation-message">সঠিক ১১-ডিজিটের ফোন নম্বর দিন।</div>
                 <input type="text" id="customer-address" placeholder="Address (Optional)">
                 <button type="submit" class="primary-btn">Confirm Order</button>
             </form>
