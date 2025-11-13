@@ -3,7 +3,7 @@
 const API_KEY = "AIzaSyANHxkVsDT_nN0BHgyReFrkJYVvF5_Sl-Q";
 const HOMEPAGE_SPREADSHEET_ID = "1uKNlnpZsmQbmIPkfEWvWK5qLHpgGOUeneaHM8wXPG3E";
 const CATEGORY_SHEET_NAME = "Sheet1";
-const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1427390049783255110/8U3d9RnA3wT8VzeblhfHOtv0Z5RDVLBj6A636ZOA2o7o6DXJlIHK6POhbWKF5OdOQXbo";
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1427390049783255110/8U3d9RnA3wT8VzeblhfHOtv0Z5RDVLBj6A636ZOA2o7o6DXJlHIK6POhbWKF5OdOQXbo";
 
 // ** NEW SHOP LOCATION COORDINATES (Placeholder: Googleplex) **
 const SHOP_LATITUDE = "25.0723411";
@@ -1111,8 +1111,64 @@ async function handleOrderSubmit(e) {
 // Global variable to store all products from all categories
 let allProducts = [];
 
+// REMOVED: const CACHED_PRODUCT_VERSION = Date.now(); 
+
+// Function to store the categories and products data to local storage
+function saveProductsToCache(data) {
+    const cacheData = {
+        data: data,
+        timestamp: Date.now() // Store the time it was saved
+    };
+    try {
+        // Store the product list and the new timestamp
+        localStorage.setItem('cachedProducts', JSON.stringify(cacheData));
+    } catch (e) {
+        console.warn("Could not save products to local storage. Searching will only work once per session.");
+    }
+}
+
+// Function to load the cached product data, checking for 20-minute expiration
+function loadProductsFromCache() {
+    const CACHE_DURATION_MS = 20 * 60 * 1000; // 20 minutes in milliseconds
+    try {
+        const cached = localStorage.getItem('cachedProducts');
+        if (cached) {
+            const cacheObj = JSON.parse(cached);
+            
+            // 1. Check if both data and timestamp exist
+            if (cacheObj.data && cacheObj.timestamp) {
+                const age = Date.now() - cacheObj.timestamp;
+                
+                // 2. Check for cache expiration
+                if (age < CACHE_DURATION_MS) {
+                    console.log(`Loading products from cache. Cache age: ${Math.round(age / 1000)}s`);
+                    return cacheObj.data; // Cache is fresh!
+                } else {
+                    console.log(`Cache expired (${Math.round(age / 60000)} minutes old). Forcing API fetch.`);
+                    // Optionally clear old cache, but just returning null is enough to trigger a fetch
+                    localStorage.removeItem('cachedProducts');
+                }
+            }
+        }
+    } catch (e) {
+        console.error("Error loading products from cache:", e);
+        localStorage.removeItem('cachedProducts'); // Clear corrupt cache
+    }
+    return null; // Force API fetch
+}
+
+
 // Function to search products across all categories
 async function searchProducts(query) {
+    // 1. Try to load products from cache, which now includes the 20-minute time check.
+    let cachedData = loadProductsFromCache();
+
+    if (cachedData) {
+        // Cache is fresh (under 20 mins), use it.
+        allProducts = cachedData;
+    }
+
+    // 2. If allProducts is empty (meaning cache was null/expired/missing), perform the full fetch
     if (allProducts.length === 0) {
         // First, fetch all categories
         const categoriesData = await fetchSheetData(HOMEPAGE_SPREADSHEET_ID, CATEGORY_SHEET_NAME);
@@ -1121,22 +1177,28 @@ async function searchProducts(query) {
         // Skip header row
         const categories = categoriesData.slice(1);
         
+        // Temporary array to hold fresh products before caching
+        const freshProducts = [];
+
         // Fetch products from each category
         for (const row of categories) {
             const categoryName = row[0];
             const categorySheetId = row[1];
             if (categoryName && categorySheetId) {
-                const productsData = await fetchSheetData(categorySheetId);
+                // IMPORTANT: We need to force a fresh fetch to get the latest price/name 
+                // data for the full search capability.
+                const productsData = await fetchSheetData(categorySheetId); 
+                
                 if (productsData) {
                     // Skip header row
                     const products = productsData.slice(1);
                     products.forEach(row => {
-                        // --- NEW STOCK CHECK ---
+                        // --- STOCK CHECK ---
                         const mainPriceStr = row[3];
                         const discountedPriceStr = row[4];
                         const isStockedOut = (!mainPriceStr || mainPriceStr.trim() === '') && (!discountedPriceStr || discountedPriceStr.trim() === '');
                         
-                        allProducts.push({
+                        freshProducts.push({
                             name: row[0],
                             brand: row[1],
                             weight: row[2],
@@ -1144,19 +1206,22 @@ async function searchProducts(query) {
                             discountedPrice: parseFloat(discountedPriceStr) || 0,
                             image: row[5],
                             id: row[6],
-                            tags: row[7],
+                            tags: row[7], // <-- Tags are here
                             category: categoryName,
-                            isStockedOut: isStockedOut // Pass the stock status
+                            isStockedOut: isStockedOut 
                         });
-                        // --- END STOCK CHECK ---
                     });
                 }
             }
         }
+        
+        // 3. Update the global array and save the fresh data to cache
+        allProducts = freshProducts;
+        saveProductsToCache(freshProducts);
     }
     
-    // Filter products based on search query
-    query = query.toLowerCase();
+    // 4. Filter products based on search query
+    query = query.toLowerCase().trim();
     
     // Split the query into individual terms for more accurate searching
     const searchTerms = query.split(/\s+/).filter(term => term.length > 0);
@@ -1172,12 +1237,16 @@ async function searchProducts(query) {
         // If no search terms, return false
         if (searchTerms.length === 0) return false;
         
-        // Check if all search terms are found in at least one of the fields
+        // --- NEW: Optimized Tag/Name/Brand Search Logic ---
+        // Check if ALL search terms are found in at least one of the fields.
+        
         return searchTerms.every(term => 
             productName.includes(term) || 
             productBrand.includes(term) || 
             productTags.includes(term)
         );
+        // NOTE on Tags: The `productTags.includes(term)` check handles partial matches within a tag (e.g.,
+        // searching "thir" finds "thir chini"), which covers your requirement!
     });
 }
 
@@ -1197,7 +1266,7 @@ function displaySearchResults(results) {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card');
 
-        // --- NEW STOCK CHECK ---
+        // --- STOCK CHECK ---
         let finalPrice = 0;
         let priceHtml = '';
         let buttonHtml = '';
@@ -1228,7 +1297,7 @@ function displaySearchResults(results) {
         productCard.innerHTML = `
             ${discountBadge}
             <img src="${item.image}" alt="${item.name}" onerror="this.onerror=null; this.src='https://placehold.co/150x150/8C7047/ffffff?text=Image+Not+Found'">
-            <h3>${itemName}</h3>
+            <h3>${item.name}</h3>
             <p class="category-tag">${item.category}</p>
             ${priceHtml}
             ${buttonHtml}
@@ -1433,4 +1502,3 @@ window.onload = () => {
         loadHomepage();
     }
 };
-
