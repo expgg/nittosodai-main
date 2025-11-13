@@ -1157,9 +1157,80 @@ function loadProductsFromCache() {
     return null; // Force API fetch
 }
 
+/**
+ * NEW FUNCTION: Shows the loading overlay with a spinner.
+ */
+function showLoader() {
+    const productsContainer = document.getElementById('products-container');
+    if (!productsContainer) return;
+    
+    // Clear old content
+    productsContainer.innerHTML = ''; 
 
-// Function to search products across all categories
+    // Create and append loader HTML (use the same container for simplicity)
+    const loaderHtml = `
+        <div class="loader-overlay" id="search-loader">
+            <i class="fas fa-sync-alt loader-spinner"></i>
+            <p class="loader-text">আপনার প্রোডাক্ট খোঁজা হচ্ছে.....</p>
+        </div>
+    `;
+    
+    // We append directly to the product container which is centered and handles the layout
+    productsContainer.innerHTML = loaderHtml;
+}
+
+/**
+ * NEW FUNCTION: Hides the loading overlay.
+ */
+function hideLoader() {
+    const loader = document.getElementById('search-loader');
+    if (loader) {
+        // Find the parent container and remove the loader element
+        loader.remove(); 
+    }
+}
+
+/**
+ * UPDATED FUNCTION: Shows a custom 'No Results' message with action buttons.
+ * Removed English text and 'Search Again' button.
+ * @param {string} query - The search query entered by the user.
+ */
+function showNoResults(query) {
+    const productsContainer = document.getElementById('products-container');
+    if (!productsContainer) return;
+    
+    // Clear old content
+    productsContainer.innerHTML = '';
+    
+    const whatsappNumber = "8801300226699"; // Existing contact number from side-menu/about.html
+    const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hi, I couldn't find '${query}' on the website. Could you please help me?`)}`;
+
+    // --- UPDATED HTML STRUCTURE ---
+    const noResultsHtml = `
+        <div class="no-results-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>দুঃখিত! এই নামে কিছু খুঁজে পাইনি।</h3>
+            <p>আপনার আইটেম খুঁজে পাচ্ছেন না? আমাদের মেসেজ করুন!</p>
+
+            <div class="no-results-actions">
+                <a href="${whatsappLink}" target="_blank" class="whatsapp-btn">
+                    <i class="fab fa-whatsapp"></i> WhatsApp-এ মেসেজ করুন
+                </a>
+            </div>
+        </div>
+    `;
+    
+    productsContainer.innerHTML = noResultsHtml;
+
+    // NOTE: Removed 'Search Again' button logic as requested.
+}
+
+
+// Function to search products across all categories (UPDATED with Loader)
 async function searchProducts(query) {
+    // 1. SHOW LOADER
+    showLoader(); 
+
     // 1. Try to load products from cache, which now includes the 20-minute time check.
     let cachedData = loadProductsFromCache();
 
@@ -1170,9 +1241,14 @@ async function searchProducts(query) {
 
     // 2. If allProducts is empty (meaning cache was null/expired/missing), perform the full fetch
     if (allProducts.length === 0) {
+        
         // First, fetch all categories
         const categoriesData = await fetchSheetData(HOMEPAGE_SPREADSHEET_ID, CATEGORY_SHEET_NAME);
-        if (!categoriesData) return [];
+        if (!categoriesData) {
+             // 2. HIDE LOADER on error
+            hideLoader(); 
+            return [];
+        }
         
         // Skip header row
         const categories = categoriesData.slice(1);
@@ -1226,7 +1302,7 @@ async function searchProducts(query) {
     // Split the query into individual terms for more accurate searching
     const searchTerms = query.split(/\s+/).filter(term => term.length > 0);
     
-    return allProducts.filter(product => {
+    const filteredResults = allProducts.filter(product => {
         // Check if product exists and has required properties
         if (!product) return false;
         
@@ -1248,17 +1324,23 @@ async function searchProducts(query) {
         // NOTE on Tags: The `productTags.includes(term)` check handles partial matches within a tag (e.g.,
         // searching "thir" finds "thir chini"), which covers your requirement!
     });
+    
+    // 5. HIDE LOADER before returning results
+    hideLoader();
+
+    return filteredResults;
 }
 
-// Function to display search results
-function displaySearchResults(results) {
+// Function to display search results (UPDATED to handle NO RESULTS)
+function displaySearchResults(results, searchQuery) { // Added searchQuery parameter
     const productsContainer = document.getElementById('products-container');
     if (!productsContainer) return;
     
     productsContainer.innerHTML = '';
     
     if (results.length === 0) {
-        productsContainer.innerHTML = "<p>No products found matching your search.</p>";
+        // *** NEW: Call custom no results handler ***
+        showNoResults(searchQuery); 
         return;
     }
     
@@ -1317,7 +1399,7 @@ function displaySearchResults(results) {
     });
 }
 
-// Setup search functionality
+// Setup search functionality (UPDATED with loader integration)
 function setupSearch() {
     const searchBtn = document.getElementById('search-btn');
     const searchContainer = document.getElementById('search-container');
@@ -1328,13 +1410,14 @@ function setupSearch() {
     
     // Toggle search bar when search button is clicked
     searchBtn.addEventListener('click', () => {
-        searchContainer.classList.toggle('open');
-        if (searchContainer.classList.contains('open')) {
-            // Focus on the search input when opened
-            setTimeout(() => {
+        // If the search container is currently hidden and we click search
+        if (!searchContainer.classList.contains('open')) {
+             // Wait for animation to complete before focusing
+             setTimeout(() => {
                 searchInput.focus();
-            }, 300); // Wait for animation to complete
+             }, 300);
         }
+        searchContainer.classList.toggle('open');
     });
     
     // Close search bar when clicking outside
@@ -1344,28 +1427,32 @@ function setupSearch() {
         }
     });
     
-    // Handle search form submission
+    // Handle search form submission (UPDATED)
     searchForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const searchQuery = searchInput.value.trim();
         if (!searchQuery) return;
         
-        // Close the search container
+        // Close the search container immediately
         searchContainer.classList.remove('open');
         
-        // If we're not on the category page, navigate to it
+        // If we're not on the category page, navigate to it with the query
         if (!window.location.pathname.includes('category.html')) {
             window.location.href = `category.html?search=${encodeURIComponent(searchQuery)}`;
             return;
         }
         
-        // Update page title and header
+        // --- NEW: Handle search on the category page asynchronously ---
+        
+        // 1. Update page title and header
         document.getElementById('category-page-title').textContent = `Search: ${searchQuery}`;
         document.getElementById('category-name-header').textContent = `Search Results: ${searchQuery}`;
         
-        // Perform search and display results
+        // 2. Perform search and display results (showLoader/hideLoader handled inside searchProducts)
         const results = await searchProducts(searchQuery);
-        displaySearchResults(results);
+        
+        // 3. Display results (pass query for the no-results handler)
+        displaySearchResults(results, searchQuery);
     });
 }
 
@@ -1484,9 +1571,10 @@ window.onload = () => {
             document.getElementById('category-page-title').textContent = `Search: ${searchQuery}`;
             document.getElementById('category-name-header').textContent = `Search Results: ${searchQuery}`;
             
-            // Perform search and display results
+            // Perform search and display results (showLoader/hideLoader handled inside searchProducts)
             searchProducts(searchQuery).then(results => {
-                displaySearchResults(results);
+                // Display results (pass query for the no-results handler)
+                displaySearchResults(results, searchQuery); 
             });
         } else {
             loadCategoryPage();
