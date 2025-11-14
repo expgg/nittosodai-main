@@ -3,7 +3,7 @@
 const API_KEY = "AIzaSyANHxkVsDT_nN0BHgyReFrkJYVvF5_Sl-Q";
 const HOMEPAGE_SPREADSHEET_ID = "1uKNlnpZsmQbmIPkfEWvWK5qLHpgGOUeneaHM8wXPG3E";
 const CATEGORY_SHEET_NAME = "Sheet1";
-const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1427390049783255110/8U3d9RnA3wT8VzeblhfHOtv0Z5RDVLBj6A636ZOA2o7o6DXJlHIK6POhbWKF5OdOQXbo";
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1427390049783255110/8U3d9RnA3wT8VzeblhfHOtv0Z5RDVLBj6A636ZOA2o7o6DXJlIHK6POhbWKF5OdOQXbo";
 
 // ** NEW SHOP LOCATION COORDINATES (Placeholder: Googleplex) **
 const SHOP_LATITUDE = "25.0723411";
@@ -1590,3 +1590,4 @@ window.onload = () => {
         loadHomepage();
     }
 };
+
