@@ -384,7 +384,7 @@ function setupBottomNav() {
 
     if (cartBtn) {
         cartBtn.addEventListener('click', () => {
-            window.location.href = 'cart.html';
+            window.location.href = 'cr.html';
         });
     }
     
@@ -1579,7 +1579,7 @@ window.onload = () => {
         } else {
             loadCategoryPage();
         }
-    } else if (filename.includes('cart.html')) {
+    } else if (filename.includes('cr.html')) {
         loadCartPage();
     } else if (filename.includes('about.html')) {
         // No specific JS needed for about.html yet, but setupSidebar and updateCartCount ran
